@@ -154,6 +154,46 @@ router.post('/update-email/:userId', async (req, res) => {
     }
 });
 
+router.post('/update-password', async (req, res) => {
+    const newPassword = req.body.newPassword;
+    const token = req.headers.authorization;
+
+    if (!token) {
+        return res.status(401).json({ error: 'Token non fourni.' });
+    }
+
+    try {
+        const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+        const userId = decodedToken.userId;
+
+        const con = connectDB();
+
+        const userExistsQuery = `SELECT * FROM users WHERE id = ?`;
+        con.query(userExistsQuery, [userId], function (err, results) {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Erreur lors de la vérification de l\'existence de l\'utilisateur.');
+            }
+
+            if (results.length === 0) {
+                return res.status(404).send('Utilisateur non trouvé.');
+            }
+            const updatePasswordQuery = `UPDATE users SET password = ? WHERE id = ?`;
+            con.query(updateEmailQuery, [newEmail, userId], function (err, updateResult) {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).send('Erreur lors de la mise à jour de l\'adresse e-mail.');
+                }
+
+                res.status(200).json({message: 'Adresse e-mail mise à jour avec succès.', newEmail});
+            });
+        });
+    } catch(e) {
+        console.error('Erreur de vérification du token :', error);
+        return res.status(401).json({ error: 'Token invalide.' });
+    }
+})
+
 
 module.exports = (app) => {
     app.use('/api', router);

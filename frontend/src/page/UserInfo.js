@@ -17,6 +17,7 @@ export const UserInfo = () => {
   const [username, setUsername] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const {userId, checkTokenExpiration} = useContext(AuthContext);
   const storedToken = localStorage.getItem('authToken');
   const navigate = useNavigate();
@@ -72,11 +73,25 @@ export const UserInfo = () => {
     }
   };
 
-  const handleChangePassword = () => {
-    // Vous pouvez implémenter ici la logique pour changer le mot de passe côté serveur
-    // par exemple, en utilisant une requête fetch vers votre backend
-    console.log('Changer le mot de passe vers :', newPassword);
-    // Mettez à jour l'état si nécessaire
+  const handleChangePassword = async() => {
+    if (newPassword === confirmNewPassword) {
+      const response = await fetch(`http://127.0.0.1:5000/api/update-email/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `${storedToken}`,
+            },
+            body: JSON.stringify({ newPassword, storedToken }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+  
+          setNewPassword('')
+          setConfirmNewPassword('')
+      }
+    }
+    console.log('password changed',);
   };
 
   return (
@@ -108,6 +123,13 @@ export const UserInfo = () => {
           placeholder="Entrez le nouveau mot de passe"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
+        />
+        <FormLabel>Nouveau Mot de passe</FormLabel>
+        <Input
+          type="password"
+          placeholder="confirmez le nouveau mot de passe"
+          value={confirmNewPassword}
+          onChange={(e) => setConfirmNewPassword(e.target.value)}
         />
       </FormControl>
       <Button colorScheme="teal" mb={4} onClick={handleChangePassword}>

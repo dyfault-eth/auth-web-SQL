@@ -33,9 +33,7 @@ export const AuthPage = () => {
         localStorage.setItem('authToken', token);
         setAuthData(user)
 
-
-        // Utilisez la fonction navigate pour rediriger l'utilisateur
-        navigate('/userinfo');
+        navigate('/home');
       } else {
         console.log('Échec de la connexion. Vérifiez vos identifiants.');
       }

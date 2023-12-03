@@ -44,7 +44,7 @@ export const UserInfo = () => {
       }
 
     fetchUserInfo();
-  }, [storedToken, email, checkTokenExpiration, navigate]);
+  }, [storedToken, email, checkTokenExpiration]);
 
   const handleChangeEmail = async() => {
     try {

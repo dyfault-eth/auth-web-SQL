@@ -317,6 +317,48 @@ router.get('/get-all-meeting', async (req, res) => {
 
             const getMeetingsQuery = `SELECT * FROM meeting`;
 
+            con.query(getMeetingsQuery, function (err, meetings) {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).send('Erreur lors de la récupération des rendez-vous.');
+                }
+
+                return res.status(200).json({ meetings });
+            });
+        });
+    } catch (e) {
+        console.log(e);
+        return res.status(500).send('Erreur lors de la vérification du token.');
+    }
+});
+
+router.get('/get-user-meeting', async (req, res) => {
+    const token = req.headers.authorization;
+
+    if (!token) {
+        return res.status(401).json({ error: 'Token non fourni.' });
+    }
+
+    try {
+        const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+        const userId = decodedToken.userId;
+
+        const con = connectDB();
+
+        const userExistsQuery = `SELECT * FROM users WHERE id = ?`;
+
+        con.query(userExistsQuery, [userId], function (err, results) {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Erreur lors de la vérification de l\'existence de l\'utilisateur.');
+            }
+
+            if (results.length === 0) {
+                return res.status(404).send('Utilisateur non trouvé.');
+            }
+
+            const getMeetingsQuery = `SELECT * FROM meeting WHERE user_id = ?`;
+
             con.query(getMeetingsQuery, [userId], function (err, meetings) {
                 if (err) {
                     console.error(err);
